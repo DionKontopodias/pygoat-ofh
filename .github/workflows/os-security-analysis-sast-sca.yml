@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  sast:
+  codeql:
     name: SAST with sast-scan
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -21,6 +21,18 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.11.0b1-buster' # Specify the Python version you are using
+
+    - name: Upgrade pip and Install dependencies
+      run: |
+        python -m venv venv
+        . venv/bin/activate
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
@@ -33,3 +45,11 @@ jobs:
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
+      with:
+        output: codeql-results.sarif
+
+    - name: Upload SARIF file
+      uses: actions/upload-artifact@v2
+      with:
+        name: CodeQL SARIF Results
+        path: codeql-results.sarif
