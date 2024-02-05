@@ -2,40 +2,34 @@ name: Security Analysis
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * *' # This schedules the workflow to run at midnight UTC. Adjust the cron schedule as needed or remove it if you prefer manual triggers only.
 
 jobs:
   sast:
-    runs-on: ubuntu-latest
     name: SAST with sast-scan
-    steps:
-      - uses: actions/checkout@v2
-      - name: SAST Scan
-        uses: AppThreat/sast-scan-action@master
-        with:
-          type: "python"
-      - uses: actions/upload-artifact@v2
-        with:
-          name: SAST-Reports
-          path: reports
-
-  sca:
     runs-on: ubuntu-latest
-    name: SCA with OWASP Dependency-Check
+    timeout-minutes: 360
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'python' ] 
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup Java
-        uses: actions/setup-java@v1
-        with:
-          java-version: '11'
-      - name: OWASP Dependency Check
-        uses: jeremylong/DependencyCheck_Action@v2
-        with:
-          project: "PyGoat"
-          path: "."
-          format: "HTML"
-      - uses: actions/upload-artifact@v2
-        with:
-          name: SCA-Reports
-          path: ./dependency-check-report.html
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+
+    # Removed Autobuild for Python as it's not needed for interpreted languages like Python
+    # TODO: Might need to get a bit more specific about Python.
+    # Example: setup database, migrations, or install dependencies.
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
