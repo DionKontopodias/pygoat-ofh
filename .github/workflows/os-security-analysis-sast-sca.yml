@@ -1,0 +1,41 @@
+name: Security Analysis
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *' # This schedules the workflow to run at midnight UTC. Adjust the cron schedule as needed or remove it if you prefer manual triggers only.
+
+jobs:
+  sast:
+    runs-on: ubuntu-latest
+    name: SAST with sast-scan
+    steps:
+      - uses: actions/checkout@v2
+      - name: SAST Scan
+        uses: AppThreat/sast-scan-action@master
+        with:
+          type: "python"
+      - uses: actions/upload-artifact@v2
+        with:
+          name: SAST-Reports
+          path: reports
+
+  sca:
+    runs-on: ubuntu-latest
+    name: SCA with OWASP Dependency-Check
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+      - name: OWASP Dependency Check
+        uses: jeremylong/DependencyCheck_Action@v2
+        with:
+          project: "PyGoat"
+          path: "."
+          format: "HTML"
+      - uses: actions/upload-artifact@v2
+        with:
+          name: SCA-Reports
+          path: ./dependency-check-report.html
