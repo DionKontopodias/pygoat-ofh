@@ -61,9 +61,20 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v2
         with:
-          submodules: true
+          python-version: '3.11.0' # Specify the Python version you are using
+  
+      - name: Upgrade pip and Install dependencies
+        run: |
+          python -m venv venv
+          . venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Run Pysa
         uses: facebook/pysa-action@f46a63777e59268613bd6e2ff4e29f144ca9e88b
