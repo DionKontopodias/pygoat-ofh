@@ -25,7 +25,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.11.0b1-buster' # Specify the Python version you are using
+        python-version: '3.11.0' # Specify the Python version you are using
 
     - name: Upgrade pip and Install dependencies
       run: |
