@@ -53,35 +53,37 @@ jobs:
       with:
         name: CodeQL SARIF Results
         path: codeql-results.sarif
-  pysa:
+  trivy:
     permissions:
-      actions: read
-      contents: read
-      security-events: write
-
-    runs-on: ubuntu-latest
+      contents: read 
+      security-events: write 
+      actions: read 
+    name: Build
+    runs-on: "ubuntu-20.04"
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.11.0' # Specify the Python version you are using
-  
-      - name: Upgrade pip and Install dependencies
-        run: |
-          python -m venv venv
-          . venv/bin/activate
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Run Pysa
-        uses: facebook/pysa-action@f46a63777e59268613bd6e2ff4e29f144ca9e88b
+      - name: Build an image from Dockerfile
+        run: |
+          docker build -t docker.io/my-organization/pygoat-vulnerable-app:${{ github.sha }} .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
         with:
-          # To customize these inputs:
-          # See https://github.com/facebook/pysa-action#inputs
-          repo-directory: './'
-          requirements-path: 'requirements.txt'
-          infer-types: true
-          include-default-sapp-filters: true
+          image-ref: 'docker.io/my-organization/pygoat-vulnerable-app:${{ github.sha }}'
+          format: 'template'
+          template: '@/contrib/sarif.tpl'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+      
+      - name: Upload SARIF file
+        uses: actions/upload-artifact@v2
+        with:
+          name: Trivy SARIF Results
+          path: trivy-results.sarif
