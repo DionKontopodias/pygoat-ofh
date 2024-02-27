@@ -20,6 +20,6 @@ jobs:
       - name: Run a SAST scan
         run: |
           kdt scan
-            -p ${{ github.event.repository.name }}
+            -p pygoat-test
             -t bandit
             -b master 
