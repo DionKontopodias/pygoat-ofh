@@ -22,4 +22,4 @@ jobs:
           kdt scan
             -p ${{ github.event.repository.name }}
             -t bandit
-            -b ${{ github.ref }} 
+            -b master 
