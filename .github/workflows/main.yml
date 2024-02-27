@@ -14,12 +14,12 @@ jobs:
       - name: Setup KDT
         run: |
           curl -sSL https://cli.kondukto.io | sh
-          echo "KONDUKTO_HOST=${{ secrets.KONDUKTO_HOST }}" >> $GITHUB_ENV
-          echo "KONDUKTO_TOKEN=${{ secrets.KONDUKTO_TOKEN }}" >> $GITHUB_ENV
 
       - name: Run a SAST scan
         run: |
           kdt scan
+            --host https://ourfuturehealth.kondukto.io
+            --token cXNVeW5uRnlOVDhrYWplMWtqa251cmxIVm1KTmVPUGwyRkFZelZZU2trZ1VPZFBRekIzN2piSHdrbFV0
             -p pygoat-test
             -t bandit
             -b master 
